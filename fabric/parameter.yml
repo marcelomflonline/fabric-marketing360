@@ -1,0 +1,7 @@
+# Substituições por ambiente aplicadas pelo fabric-cicd ao publicar.
+# Os notebooks deste projeto resolvem Lakehouses e Warehouse POR NOME no workspace atual,
+# por isso quase nada precisa de ser substituído. Exemplo para o ID do workspace em pipelines:
+find_replace:
+  - find_value: "00000000-0000-0000-0000-000000000000"   # GUID do workspace DEV
+    replace_value:
+      PRD: "11111111-1111-1111-1111-111111111111"        # GUID do workspace PRD

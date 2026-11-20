@@ -1,0 +1,24 @@
+# Integração contínua: corre em cada Pull Request e push.
+# Valida estilo (ruff) e regras de negócio (pytest com Spark local + simulação ponta-a-ponta).
+name: ci
+on:
+  pull_request:
+  push:
+    branches: [main, develop]
+
+jobs:
+  testes:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "17" }
+      - run: pip install -r requirements-dev.txt
+      - name: Lint
+        run: ruff check src tests
+      - name: Testes unitários
+        run: pytest -q tests
+      - name: Simulação ponta-a-ponta (Bronze + Silver, inicial + incremental)
+        run: python tests/simulacao_local.py

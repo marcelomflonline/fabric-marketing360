@@ -1,0 +1,130 @@
+// =====================================================================================
+// Medidas DAX do modelo SM_Marketing360 — GERADO a partir de NB_40_Modelo_Semantico (fonte única).
+// Usar como referência/fallback manual. A forma recomendada é executar o NB_40.
+// =====================================================================================
+
+// Relações (N → 1, filtro único):
+//   Contactos[id_data_envio] → Data[id_data]
+//   Contactos[sk_campanha] → Campanha[sk_campanha]
+//   Contactos[sk_cliente] → Cliente[sk_cliente]
+//   Conversões[id_data_conversao] → Data[id_data]
+//   Conversões[sk_campanha] → Campanha[sk_campanha]
+//   Conversões[sk_cliente] → Cliente[sk_cliente]
+//   Conversões[sk_produto] → Produto[sk_produto]
+//   Custos[id_data] → Data[id_data]
+//   Custos[sk_campanha] → Campanha[sk_campanha]
+//   Envolvimento[sk_cliente] → Cliente[sk_cliente]
+
+
+// ---------- 1. Funil ----------
+// Nº de mensagens/contactos enviados.
+// tabela: Contactos   formato: #,0
+[Contactos Enviados] = SUM ( Contactos[enviado] )
+// tabela: Contactos   formato: #,0
+[Contactos Entregues] = SUM ( Contactos[entregue] )
+// tabela: Contactos   formato: #,0
+[Aberturas] = SUM ( Contactos[aberto] )
+// tabela: Contactos   formato: #,0
+[Cliques] = SUM ( Contactos[clicado] )
+// Clientes distintos (id de negócio, todas as versões SCD2).
+// tabela: Contactos   formato: #,0
+[Clientes Contactados] = CALCULATE ( DISTINCTCOUNT ( Cliente[id_cliente] ), Contactos )
+// tabela: Contactos   formato: 0.0%
+[Taxa de Entrega] = DIVIDE ( [Contactos Entregues], [Contactos Enviados] )
+// Aberturas ÷ entregues.
+// tabela: Contactos   formato: 0.0%
+[Taxa de Abertura] = DIVIDE ( [Aberturas], [Contactos Entregues] )
+// Cliques ÷ entregues.
+// tabela: Contactos   formato: 0.0%
+[CTR] = DIVIDE ( [Cliques], [Contactos Entregues] )
+// tabela: Contactos   formato: 0.0%
+[Click-to-Open] = DIVIDE ( [Cliques], [Aberturas] )
+
+// ---------- 2. Conversão ----------
+// Contratações atribuídas a campanhas.
+// tabela: Conversões   formato: #,0
+[Conversões] = COUNTROWS ( 'Conversões' )
+// Conversões ÷ enviados.
+// tabela: Conversões   formato: 0.0%
+[Taxa de Conversão] = DIVIDE ( [Conversões], [Contactos Enviados] )
+// tabela: Conversões   formato: #,0
+[Conversões por Clique] = CALCULATE ( [Conversões], 'Conversões'[tipo_atribuicao] = "Clique" )
+// tabela: Conversões   formato: #,0 €
+[Valor Contratado] = SUM ( 'Conversões'[valor_contratado] )
+// tabela: Conversões   formato: #,0 €
+[Ticket Médio] = DIVIDE ( [Valor Contratado], [Conversões] )
+// Valor contratado × margem anual estimada do produto.
+// tabela: Conversões   formato: #,0 €
+[Receita Estimada] = SUM ( 'Conversões'[receita_estimada] )
+// tabela: Conversões   formato: 0.0
+[Dias até Conversão] = AVERAGE ( 'Conversões'[dias_ate_conversao] )
+
+// ---------- 3. Custos e Retorno ----------
+// Custo real faturado.
+// tabela: Custos   formato: #,0 €
+[Custo] = SUM ( Custos[custo] )
+// tabela: Custos   formato: #,0 €
+[Orçamento] = SUM ( Campanha[orcamento] )
+// tabela: Custos   formato: 0.0%
+[Execução do Orçamento] = DIVIDE ( [Custo], [Orçamento] )
+// tabela: Custos   formato: #,0.000 €
+[Custo por Contacto] = DIVIDE ( [Custo], [Contactos Enviados] )
+// Custo por clique.
+// tabela: Custos   formato: #,0.00 €
+[CPC] = DIVIDE ( [Custo], [Cliques] )
+// Custo por aquisição.
+// tabela: Custos   formato: #,0.00 €
+[CPA] = DIVIDE ( [Custo], [Conversões] )
+// tabela: Custos   formato: #,0
+[Impressões] = SUM ( Custos[impressoes] )
+// tabela: Custos   formato: #,0.00 €
+[CPM] = DIVIDE ( [Custo], [Impressões] ) * 1000
+// (Receita estimada − custo) ÷ custo.
+// tabela: Custos   formato: 0.0%
+[ROI] = DIVIDE ( [Receita Estimada] - [Custo], [Custo] )
+// tabela: Custos   formato: 0.00x
+[ROAS] = DIVIDE ( [Receita Estimada], [Custo] )
+
+// ---------- 4. Tempo ----------
+// tabela: Conversões   formato: #,0
+[Conversões Mês Anterior] = CALCULATE ( [Conversões], DATEADD ( 'Data'[data], -1, MONTH ) )
+// tabela: Conversões   formato: 0.0%
+[Conversões Var. % MoM] = DIVIDE ( [Conversões] - [Conversões Mês Anterior], [Conversões Mês Anterior] )
+// tabela: Conversões   formato: #,0 €
+[Valor Contratado YTD] = TOTALYTD ( [Valor Contratado], 'Data'[data] )
+// tabela: Custos   formato: #,0 €
+[Custo YTD] = TOTALYTD ( [Custo], 'Data'[data] )
+
+// ---------- 5. Clientes ----------
+// Clientes atuais (versão corrente).
+// tabela: Envolvimento   formato: #,0
+[Clientes na Base] = CALCULATE ( DISTINCTCOUNT ( Cliente[id_cliente] ), Cliente[registo_atual] = TRUE (), Cliente[id_cliente] <> -1 )
+// tabela: Envolvimento   formato: #,0
+[Clientes com Consentimento] = CALCULATE ( [Clientes na Base], Cliente[consentimento_marketing] = TRUE () )
+// tabela: Envolvimento   formato: 0.0%
+[% Consentimento] = DIVIDE ( [Clientes com Consentimento], [Clientes na Base] )
+// tabela: Envolvimento   formato: 0.0
+[Score Médio de Envolvimento] = AVERAGE ( Envolvimento[score_envolvimento] )
+// tabela: Envolvimento   formato: #,0
+[Clientes Alto Envolvimento] = CALCULATE ( COUNTROWS ( Envolvimento ), Envolvimento[nivel_envolvimento] = "Alto" )
+// Clientes muito envolvidos que ainda não contrataram: lista para a próxima campanha.
+// tabela: Envolvimento   formato: #,0
+[Oportunidades (Alto sem Conversão)] = CALCULATE ( COUNTROWS ( Envolvimento ), Envolvimento[nivel_envolvimento] = "Alto", Envolvimento[n_conversoes] = 0 )
+// RGPD: deve ser 0. Usa a versão do cliente à data do envio.
+// tabela: Contactos   formato: #,0
+[Contactos sem Consentimento] = CALCULATE ( [Contactos Enviados], Cliente[consentimento_marketing] = FALSE (), Cliente[id_cliente] <> -1 )
+
+// ---------- 9. Apresentação ----------
+// tabela: Custos   formato: #,0
+[Ranking ROI Campanha] = IF ( HASONEVALUE ( Campanha[nome_campanha] ), RANKX ( ALLSELECTED ( Campanha[nome_campanha] ), [ROI],, DESC, DENSE ) )
+// Usar em formatação condicional (valor do campo).
+// tabela: Custos   formato: (texto)
+[Cor ROI] = SWITCH ( TRUE (), ISBLANK ( [ROI] ), "#9AA0A6", [ROI] >= 1, "#1E8E3E", [ROI] >= 0, "#F9AB00", "#D93025" )
+// tabela: Custos   formato: (texto)
+[Título Página] = "Desempenho de campanhas — " & IF ( HASONEVALUE ( Campanha[canal] ), VALUES ( Campanha[canal] ), "todos os canais" )
+// tabela: Contactos   formato: (texto)
+[Última Atualização] = "Dados até " & FORMAT ( MAX ( 'Data'[data] ), "dd/mm/yyyy" )
+
+// ---------- RLS: role 'Acesso por Região' ----------
+// 'Cliente': VAR _regioes = CALCULATETABLE ( VALUES ( 'Acesso Região'[regiao] ), 'Acesso Região'[utilizador] = USERPRINCIPALNAME () ) RETURN "Todas" IN _regioes || Cliente[regiao] IN _regioes
+// 'Acesso Região': 'Acesso Região'[utilizador] = USERPRINCIPALNAME ()

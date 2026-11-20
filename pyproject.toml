@@ -1,0 +1,18 @@
+[project]
+name = "fabric-marketing360"
+version = "2.0.0"
+description = "Marketing 360 em Microsoft Fabric: Lakehouse (Bronze/Silver) + Warehouse (Gold) + Power BI"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["tests"]
+
+[tool.ruff]
+line-length = 140
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I"]
+# Notebooks Fabric usam variáveis injetadas por %run (spark, notebookutils, constantes de NB_Config)
+ignore = ["E501", "F821", "E402", "E701", "E702", "E731", "I001", "F811", "F401"]

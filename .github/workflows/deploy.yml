@@ -1,0 +1,26 @@
+# Entrega contínua com fabric-cicd (biblioteca da Microsoft).
+# Pré-requisitos: workspace DEV ligado ao Git (pasta /fabric), service principal com acesso
+# de Contributor aos workspaces e "Service principals can use Fabric APIs" ativo no tenant.
+# Secrets: AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET, FABRIC_WS_PRD
+name: deploy-prd
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: producao          # aprovação manual configurada no GitHub Environment
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11" }
+      - run: pip install fabric-cicd azure-identity
+      - name: Publicar no workspace de produção
+        env:
+          AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+          AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+          AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
+          FABRIC_WORKSPACE_ID: ${{ secrets.FABRIC_WS_PRD }}
+        run: python cicd/deploy.py --ambiente PRD

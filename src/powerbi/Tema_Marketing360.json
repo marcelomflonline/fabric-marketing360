@@ -1,0 +1,31 @@
+{
+  "name": "Marketing360",
+  "dataColors": ["#00897B", "#3B6EA5", "#F2A541", "#8E5A9B", "#5E7D8C", "#D96C4F", "#9CC5A1", "#B9C2CC"],
+  "good": "#1E8E3E",
+  "neutral": "#F9AB00",
+  "bad": "#D93025",
+  "maximum": "#00695C",
+  "center": "#F2F2F2",
+  "minimum": "#FFFFFF",
+  "background": "#FFFFFF",
+  "foreground": "#1F2A33",
+  "tableAccent": "#00897B",
+  "textClasses": {
+    "title":   { "fontFace": "Segoe UI Semibold", "fontSize": 14, "color": "#1F2A33" },
+    "header":  { "fontFace": "Segoe UI Semibold", "fontSize": 12, "color": "#1F2A33" },
+    "label":   { "fontFace": "Segoe UI", "fontSize": 10, "color": "#4A5560" },
+    "callout": { "fontFace": "Segoe UI Light", "fontSize": 28, "color": "#1F2A33" }
+  },
+  "visualStyles": {
+    "*": {
+      "*": {
+        "border": [{ "show": false }],
+        "dropShadow": [{ "show": false }],
+        "visualHeader": [{ "show": true, "transparency": 0 }],
+        "background": [{ "show": true, "color": { "solid": { "color": "#FFFFFF" } }, "transparency": 0 }]
+      }
+    },
+    "page": { "*": { "background": [{ "color": { "solid": { "color": "#F4F6F8" } }, "transparency": 0 }] } },
+    "card": { "*": { "labels": [{ "fontSize": 24 }], "categoryLabels": [{ "fontSize": 10 }] } }
+  }
+}
