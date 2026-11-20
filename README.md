@@ -1,4 +1,4 @@
-# Marketing 360 — solução end-to-end em Microsoft Fabric (v2, boas práticas)
+# Marketing 360 — solução end-to-end em Microsoft Fabric
 
 Plataforma de dados para a **equipa de Marketing de um banco de retalho** (cenário "Novo Banco"),
 construída numa **conta trial do Fabric** com **licença Power BI Free**, seguindo os padrões usados em
